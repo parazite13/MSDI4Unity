@@ -1,0 +1,300 @@
+# MSDI4Unity
+
+This package allow Unity host project to work seamlessly with `Microsoft.Extensions.DependencyInjection` also known as MSDI.
+
+## Installation
+
+### From package manager using git
+
+- Add the following line in your manifest.json
+```
+"com.parazite.msdi4unity": "https://github.com/parazite13/MSDI4Unity.git?path=/com.parazite.msdi4unity"
+```
+
+## Getting Started
+
+- Create your project service collection script :
+```csharp
+[CreateAssetMenu]
+public class ProjectServiceRegister : ServiceRegisterScriptableObject
+{
+    public override void RegisterServices(IServiceCollection services)
+    {
+    	// Use services to register as many services as you want here
+    }
+}
+```
+- Create the associated scriptableObject asset : Assets > Create > ProjectServiceRegister
+- Open Edit > Project Settings
+- Select MSDI4Unity tab
+- Drag and drop your previously created project service scriptable object in the GlobalServiceRegister
+- Retrieve the services from your script using :
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using MSDI4Unity.Extensions;
+using MSDI4Unity.Sample.Services;
+using System;
+using UnityEngine;
+
+namespace MSDI4Unity.Sample.Behaviours
+{
+    public class HelloWorldBehaviour : MonoBehaviour
+    {
+        // Retrieve services from either Awake or Start
+        private void Awake()
+        {
+            // Retrieve the IServiceProvider using extensions methods
+            IServiceProvider serviceProvider = this.GetServiceProvider();
+            // Retrieve services like you would do with MSDI
+            IHelloWorldService helloWorldService = serviceProvider.GetRequiredService<IHelloWorldService>();
+
+            // Use your services as you want
+            helloWorldService.SayHello();
+        }
+    }
+
+    public interface IHelloWorldService
+    {
+        public void SayHello();
+    }
+
+    public class HelloWorldService : IHelloWorldService
+    {
+        public void SayHello()
+        {
+            Debug.Log("Hello World!");
+        }
+    }
+}
+```
+
+## Inject services
+
+Services can be injected in MonoBehaviour fields marked with `[Inject]` attribute. When it is done a call to the extensions method `Inject()` will automatically fill all the fields with concrete instance retrieved from the service provider.
+
+```csharp
+using MSDI4Unity.Attributes;
+using MSDI4Unity.Extensions;
+using MSDI4Unity.Sample.Services;
+using UnityEngine;
+
+namespace MSDI4Unity.Sample.Behaviours
+{
+    public class AttributeInjectBehaviour : MonoBehaviour
+    {
+        // Retrieve services from InjectAttribute
+        [Inject]
+        private readonly IHelloWorldService helloWorldService;
+
+        private void Awake()
+        {
+            // Fill the fields with services retrieved from service provider
+            this.Inject();
+
+            // Use your services as you want
+            helloWorldService.SayHello();
+        }
+    }
+}
+```
+
+## Logging
+
+Logging support integrates directly with standard `Microsoft.Extensions.Logging` abstractions. 
+
+> [!NOTE]
+> Logging functionality is **optional**. It is automatically enabled when the `Microsoft.Extensions.Logging` assembly is detected in your project.
+> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.logging` and the scoped registry: 
+```
+"scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget"
+      ]
+    }
+],
+```
+
+When the logging package is present, the framework automatically defines the `MSDI_LOGGING` symbol, enabling extension methods for configuring loggers on the host builder.
+
+If enabled the global MSDISettings will have new slot for a `LoggingRegisterScriptableObject` that should be set. 
+A default implementation is included by default for a simple forward to Unity's `Debug.LogXXX()` methods: `Runtime\ScriptableObjects\DefaultLoggingRegister.asset`
+For more advanced use case any implementation of `LoggingRegisterScriptableObject` can be used to override `ILoggingBuilder`
+
+```csharp
+#if MSDI_LOGGING
+
+using Microsoft.Extensions.Logging;
+
+namespace MSDI4Unity.Logging
+{
+    public class DefaultLoggingRegisterScriptableObject : LoggingRegisterScriptableObject
+    {
+        public override void RegisterLogging(ILoggingBuilder builder)
+        {
+            builder.AddProvider(new UnityLoggerProvider());
+        }
+    }
+}
+#endif
+```
+
+When enabled `ILoggerFactory` is registered in DI and `ILogger` instance can be injected automatically like in standard dotnet.
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MSDI4Unity.Attributes;
+using MSDI4Unity.Extensions;
+using MSDI4Unity.Sample.Services;
+using System;
+using UnityEngine;
+
+namespace MSDI4Unity.Sample.Behaviours
+{
+    public class LoggingBehaviour : MonoBehaviour
+    {
+#if MSDI_LOGGING
+        [Inject]
+        private readonly ILogger<LoggingBehaviour> logger;
+
+        [Inject]
+        private readonly ILoggerFactory loggerFactory;
+
+        private void Awake()
+        {
+            this.Inject();
+
+            logger.LogInformation("LoggingBehaviour Awake called.");
+        }
+
+        private void Start()
+        {
+            var anotherLogger = loggerFactory.CreateLogger("AnotherLogger");
+            anotherLogger.LogInformation("LoggingBehaviour Start called.");
+        }
+#endif
+    }
+}
+```
+
+## Configuration
+
+Configuration support integrates `Microsoft.Extensions.Configuration` into the Unity host lifecycle.
+
+> [!NOTE]
+> Configuration functionality is optional. It requires the `Microsoft.Extensions.Configuration` assembly to be present in the project.
+> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.configuration` and the scoped registry: 
+```
+"scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget"
+      ]
+    }
+],
+```
+
+When the configuration package is present, the framework automatically defines the `MSDI_CONFIGURATION` symbol, enabling extension methods for adding configuration on the host builder.
+
+If enabled the global MSDISettings will have new slot for a `ConfigurationRegisterScriptableObject` that should be set. 
+A default implementation is included by default for a simple key/value pair configuration asset: `Runtime\ScriptableObjects\DefaultConfigurationRegister.asset`
+For more advanced use case any implementation of `ConfigurationRegisterScriptableObject` can be used to override `IConfigurationBuilder`
+
+```csharp
+#if MSDI_CONFIGURATION
+
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace MSDI4Unity.Configuration
+{
+    public class DefaultConfigurationRegisterScriptableObject : ConfigurationRegisterScriptableObject
+    {
+        [Serializable]
+        public struct ConfigEntry
+        {
+            [Tooltip("Configuration Key (e.g. Api:Url or TargetFrameRate)")]
+            public string Key;
+
+            [Tooltip("Configuration Value")]
+            public string Value;
+        }
+
+        [SerializeField]
+        private List<ConfigEntry> entries = new();
+
+        public IReadOnlyList<ConfigEntry> Entries => entries;
+
+        public override void RegisterConfiguration(IConfigurationBuilder builder)
+        {
+            builder.AddInMemoryCollection(entries.ToDictionary(entry => entry.Key, entry => entry.Value));
+        }
+    }
+}
+#endif
+```
+
+> [!NOTE]
+> The default delimiter for section in `Microsoft.Extensions.Configuration` package is ':'
+
+Values from the IConfiguration can then be retrieved with default IConfiguration injection :
+
+```csharp
+using Microsoft.Extensions.Configuration;
+using MSDI4Unity.Attributes;
+using MSDI4Unity.Extensions;
+using UnityEngine;
+
+namespace MSDI4Unity.Sample.Behaviours
+{
+    public class ConfigurationInjectBehaviour : MonoBehaviour
+    {
+#if MSDI_CONFIGURATION
+        [Inject]
+        private readonly IConfiguration configuration;
+
+        private void Awake()
+        {
+            this.Inject();
+            foreach (var kvp in configuration.AsEnumerable())
+            {
+                Debug.Log($"{kvp.Key}: {kvp.Value}");
+            }
+        }
+#endif
+    }
+}
+```
+
+## IDisposable services
+
+Like it is done in MSDI, services that implements `IDisposable`, the services will have their `Dispose()` method called when the scoped is closed.
+It means that it'll be calld either on scene unload for scene scoped services or when the project is stopped for the project scoped services.
+See `DisposableTestService.cs` for more infos.
+
+## Lifetime
+
+In MSDI4Unity, service lifecycles are bound to scene scopes and the global project host lifecycle. Each loaded scene receives its own child service provider (`IServiceProvider`) created from the global host container.
+
+### Registration Scopes & Behaviour
+
+| Service Registration | Behavior Across Scene Scopes | Lifecycle / Disposal Event |
+| :--- | :--- | :--- |
+| **Global Singleton** (`AddSingleton`) | **Shared instance** across all scenes. Resolving this service from different scene providers returns the identical instance (`ReferenceEquals`). | Disposed when the host shuts down or the application stops. |
+| **Global Scoped** (`AddScoped`) | **Per-scene instance**. Each scene provider resolves its own unique instance across scene scopes. | Disposed automatically when its host scene is unloaded. |
+| **Global Transient** (`AddTransient`) | **New instance per resolution**. Created fresh every time `GetService` or `GetRequiredService` is called across or within scene providers. | Disposed when the host scene scope is unloaded. |
+| **Scene-Specific** (`SceneServiceMapping`) | **Isolated per scene**. Registered specifically to individual scenes via `sceneServiceRegister`. The service resolves only within its mapped scene provider and resolves to `null` in unmapped scenes. | Disposed automatically when the corresponding scene is unloaded. |
+
+### Disposal Mechanics
+
+- **Automatic Scene Cleanup**: Any service implementing `IDisposable` (whether registered as Scoped, Transient, or Scene-Specific) that is resolved within a scene scope is tracked and automatically disposed (`Dispose()`) when that scene unloads (`SceneManager.UnloadSceneAsync`).
+- **Host Shutdown**: Global Singleton services implementing `IDisposable` are cleaned up when the main `UnityHost` shuts down or is disposed.

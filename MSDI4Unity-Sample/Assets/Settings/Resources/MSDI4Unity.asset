@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd77aaefd44323459fbddc7d7ce29bc, type: 3}
+  m_Name: MSDI4Unity_
+  m_EditorClassIdentifier: 
+  globalServiceRegister: {fileID: 11400000, guid: 7cc12f06d281b4948a726c0b446da9cd, type: 2}
+  sceneServiceRegister:
+  - scenePath: Assets/Scenes/SampleScene.unity
+    serviceRegister: {fileID: 11400000, guid: b47e3aff61e41fa4c9230b6a65b1985d, type: 2}
+  loggingRegister: {fileID: 11400000, guid: f575a64dfb314764db03edbf42fa3d89, type: 2}
+  configurationRegister: {fileID: 11400000, guid: b76ee11804b962643b90cd7d0134ae73, type: 2}

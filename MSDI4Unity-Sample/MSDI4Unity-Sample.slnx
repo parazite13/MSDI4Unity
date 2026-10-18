@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="MSDI4Unity.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="MSDI4Unity.Tests.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="MSDI4Unity.Editor.Tests.csproj" />
+</Solution>
