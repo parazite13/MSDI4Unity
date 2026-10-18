@@ -62,6 +62,7 @@ public class ProjectServiceRegister : ServiceRegisterScriptableObject
     public override void RegisterServices(IServiceCollection services)
     {
         // Use services to register as many services as you want here
+        services.AddScoped<IHelloWorldService, HelloWorldService>();
     }
 }
 ```
