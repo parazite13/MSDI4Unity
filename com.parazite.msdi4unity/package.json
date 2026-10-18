@@ -4,10 +4,6 @@
   "displayName": "MSDI4Unity",
   "description": "Allow the usage of Microsoft Dependency Injection framework inside Unity",
   "unity": "6000.0",
-  "dependencies": {
-    "org.nuget.microsoft.extensions.dependencyinjection": "10.0.0",
-    "org.nuget.microsoft.extensions.hosting.abstractions": "10.0.0"
-  },
   "keywords": [
     "DI",
     "DependencyInjection",

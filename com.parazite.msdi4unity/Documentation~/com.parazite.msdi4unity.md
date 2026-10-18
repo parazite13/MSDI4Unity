@@ -4,11 +4,22 @@ This package allow Unity host project to work seamlessly with `Microsoft.Extensi
 
 ## Installation
 
-### From package manager using git
-
-- Add OpenUPM scoped registry in your manifest.json to retrieve dependent `Microsoft.Extensions.*` packages nuget equivalent
+- Add the following line in your manifest.json
 ```
-"scopedRegistries": [
+"com.parazite.msdi4unity": "https://github.com/parazite13/MSDI4Unity.git?path=/com.parazite.msdi4unity"
+```
+
+As this package relies on some `Microsoft.Extensions.*` packages, two methods can be used to pull dependencies :
+
+### With OpenUPM
+- Add OpenUPM scoped registry in your manifest.json to retrieve dependent packages nuget equivalent:
+  - org.nuget.microsoft.extensions.dependencyinjection
+  - org.nuget.microsoft.extensions.hosting.abstractions
+  - *(optionnal)* org.nuget.microsoft.extensions.logging
+  - *(optionnal)* org.nuget.microsoft.extensions.configuration
+```
+{
+  "scopedRegistries": [
     {
       "name": "package.openupm.com",
       "url": "https://package.openupm.com",
@@ -16,11 +27,29 @@ This package allow Unity host project to work seamlessly with `Microsoft.Extensi
         "org.nuget"
       ]
     }
-],
+  ],
+  "dependencies": {
+    "org.nuget.microsoft.extensions.dependencyinjection": "10.0.0",
+    "org.nuget.microsoft.extensions.hosting.abstractions": "10.0.0",
+    ...
+  }
+}
 ```
-- Add the following line in your manifest.json
+
+### With Nuget4Unity
+
+- Setup [Nuget4Unity](https://github.com/GlitchEnzo/NuGetForUnity)
+- Add the following dependencies:
+  - Microsoft.Extensions.DependencyInjection
+  - Microsoft.Extensions.Hosting.Abstractions
+  - *(optionnal)* Microsoft.Extensions.Logging
+  - *(optionnal)* Microsoft.Extensions.Configuration
 ```
-"com.parazite.msdi4unity": "https://github.com/parazite13/MSDI4Unity.git?path=/com.parazite.msdi4unity"
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="Microsoft.Extensions.DependencyInjection" version="10.0.0" manuallyInstalled="true" />
+  <package id="Microsoft.Extensions.Hosting.Abstractions" version="10.0.0" manuallyInstalled="true" />
+</packages>
 ```
 
 ## Getting Started
@@ -32,7 +61,7 @@ public class ProjectServiceRegister : ServiceRegisterScriptableObject
 {
     public override void RegisterServices(IServiceCollection services)
     {
-    	// Use services to register as many services as you want here
+        // Use services to register as many services as you want here
     }
 }
 ```
@@ -131,16 +160,18 @@ Logging support integrates directly with standard `Microsoft.Extensions.Logging`
 When the logging package is present, the framework automatically defines the `MSDI_LOGGING` symbol, enabling extension methods for configuring loggers on the host builder.
 
 If enabled the global MSDISettings will have new slot for a `LoggingRegisterScriptableObject` that should be set. 
-A default implementation is included by default for a simple forward to Unity's `Debug.LogXXX()` methods: `Runtime\ScriptableObjects\DefaultLoggingRegister.asset`
-For more advanced use case any implementation of `LoggingRegisterScriptableObject` can be used to override `ILoggingBuilder`
+A default implementation is included by default for a simple forward to Unity's `Debug.LogXXX()` methods: `Runtime\ScriptableObjects\DefaultLoggingRegister.asset`.
+For more advanced use case, any implementation of `LoggingRegisterScriptableObject` can be used to override `ILoggingBuilder`
 
 ```csharp
 #if MSDI_LOGGING
 
 using Microsoft.Extensions.Logging;
+using UnityEngine;
 
 namespace MSDI4Unity.Logging
 {
+    [CreateAssetMenu(fileName = "DefaultLoggingRegister", menuName = "MSDI/Logging/DefaultLoggingRegister")]
     public class DefaultLoggingRegisterScriptableObject : LoggingRegisterScriptableObject
     {
         public override void RegisterLogging(ILoggingBuilder builder)
@@ -202,8 +233,8 @@ Configuration support integrates `Microsoft.Extensions.Configuration` into the U
 When the configuration package is present, the framework automatically defines the `MSDI_CONFIGURATION` symbol, enabling extension methods for adding configuration on the host builder.
 
 If enabled the global MSDISettings will have new slot for a `ConfigurationRegisterScriptableObject` that should be set. 
-A default implementation is included by default for a simple key/value pair configuration asset: `Runtime\ScriptableObjects\DefaultConfigurationRegister.asset`
-For more advanced use case any implementation of `ConfigurationRegisterScriptableObject` can be used to override `IConfigurationBuilder`
+A default implementation is included by default for a simple key/value pair configuration asset: `Runtime\ScriptableObjects\DefaultConfigurationRegister.asset`.
+For more advanced use case, any implementation of `ConfigurationRegisterScriptableObject` can be used to override `IConfigurationBuilder`
 
 ```csharp
 #if MSDI_CONFIGURATION
@@ -216,6 +247,7 @@ using UnityEngine;
 
 namespace MSDI4Unity.Configuration
 {
+    [CreateAssetMenu(fileName = "DefaultConfigurationRegister", menuName = "MSDI4Unity/Configuration/Default Configuration Register")]
     public class DefaultConfigurationRegisterScriptableObject : ConfigurationRegisterScriptableObject
     {
         [Serializable]
@@ -285,7 +317,7 @@ In MSDI4Unity, service lifecycles are bound to scene scopes and the global proje
 | **Project Singleton** (`AddSingleton`) | **Shared instance** across all scenes. Resolving this service from different scene providers returns the identical instance (`ReferenceEquals`). | Disposed when the host shuts down or the application stops. |
 | **Project Scoped** (`AddScoped`) | **Per-scene instance**. Each scene provider resolves its own unique instance across scene scopes. | Disposed automatically when its host scene is unloaded. |
 | **Project Transient** (`AddTransient`) | **New instance per resolution**. Created fresh every time `GetService` or `GetRequiredService` is called across or within scene providers. | Disposed when the host scene scope is unloaded. |
-| **Scene-Specific** (`SceneServiceMapping`) | **Isolated per scene**. Registered specifically to individual scenes via `sceneServiceRegister`. The service resolves only within its mapped scene provider and resolves to `null` in unmapped scenes. | Disposed automatically when the corresponding scene is unloaded. |
+| **Scene Specific** (`SceneServiceMapping`) | **Isolated per scene**. Registered specifically to individual scenes via `sceneServiceRegister`. The service resolves only within its mapped scene provider and resolves to `null` in unmapped scenes. | Disposed automatically when the corresponding scene is unloaded. |
 
 ### Disposal Mechanics
 

@@ -10,6 +10,8 @@
   ],
   "dependencies": {
     "com.parazite.msdi4unity": "file:../../com.parazite.msdi4unity",
+    "org.nuget.microsoft.extensions.dependencyinjection": "10.0.0",
+    "org.nuget.microsoft.extensions.hosting.abstractions": "10.0.0",
     "org.nuget.microsoft.extensions.configuration": "10.0.0" ,
     "org.nuget.microsoft.extensions.logging": "10.0.0" ,
     "com.unity.2d.sprite": "1.0.0",
