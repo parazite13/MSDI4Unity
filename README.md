@@ -1,1 +1,1 @@
-Documentation~/com.parazite.msdi4unity.md
+com.parazite.msdi4unity/Documentation~/com.parazite.msdi4unity.md
