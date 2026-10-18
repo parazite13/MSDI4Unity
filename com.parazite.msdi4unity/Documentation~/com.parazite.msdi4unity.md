@@ -99,6 +99,15 @@ namespace MSDI4Unity.Sample.Behaviours
 }
 ```
 
+To retrieve services from `IServiceProvider` when running outside `MonoBehaviour`, you can use the `IUnityHost` interface and the static reference from `UnityHost` that expose both the global project service provider and a method to retrieve Scene scoped based service provider with respectively:
+```csharp
+public void Foo()
+{
+    IServiceProvider rootServiceProvider = UnityHost.Instance.Services; // Global project scope IServiceProvider
+    IServiceProvider sceneServiceProvider = UnityHost.Instance.GetSceneServiceProvider(scene); // Scene scope IServiceProvider child of global project scope
+}
+```
+
 ## Logging
 
 Logging support integrates directly with standard `Microsoft.Extensions.Logging` abstractions. 
@@ -283,15 +292,15 @@ See `DisposableTestService.cs` for more infos.
 
 ## Lifetime
 
-In MSDI4Unity, service lifecycles are bound to scene scopes and the global project host lifecycle. Each loaded scene receives its own child service provider (`IServiceProvider`) created from the global host container.
+In MSDI4Unity, service lifecycles are bound to scene scopes and the global project host lifecycle. Each loaded scene receives its own child service provider (`IServiceProvider`) created from the global project host container.
 
 ### Registration Scopes & Behaviour
 
 | Service Registration | Behavior Across Scene Scopes | Lifecycle / Disposal Event |
 | :--- | :--- | :--- |
-| **Global Singleton** (`AddSingleton`) | **Shared instance** across all scenes. Resolving this service from different scene providers returns the identical instance (`ReferenceEquals`). | Disposed when the host shuts down or the application stops. |
-| **Global Scoped** (`AddScoped`) | **Per-scene instance**. Each scene provider resolves its own unique instance across scene scopes. | Disposed automatically when its host scene is unloaded. |
-| **Global Transient** (`AddTransient`) | **New instance per resolution**. Created fresh every time `GetService` or `GetRequiredService` is called across or within scene providers. | Disposed when the host scene scope is unloaded. |
+| **Project Singleton** (`AddSingleton`) | **Shared instance** across all scenes. Resolving this service from different scene providers returns the identical instance (`ReferenceEquals`). | Disposed when the host shuts down or the application stops. |
+| **Project Scoped** (`AddScoped`) | **Per-scene instance**. Each scene provider resolves its own unique instance across scene scopes. | Disposed automatically when its host scene is unloaded. |
+| **Project Transient** (`AddTransient`) | **New instance per resolution**. Created fresh every time `GetService` or `GetRequiredService` is called across or within scene providers. | Disposed when the host scene scope is unloaded. |
 | **Scene-Specific** (`SceneServiceMapping`) | **Isolated per scene**. Registered specifically to individual scenes via `sceneServiceRegister`. The service resolves only within its mapped scene provider and resolves to `null` in unmapped scenes. | Disposed automatically when the corresponding scene is unloaded. |
 
 ### Disposal Mechanics
