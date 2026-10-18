@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using MSDI4Unity.Extensions;
-#if MSDI_CONFIGURATION
-using MSDI4Unity.Configuration;
-#endif
 
 namespace MSDI4Unity.Host
 {
