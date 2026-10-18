@@ -155,7 +155,7 @@ Logging support integrates directly with standard `Microsoft.Extensions.Logging`
 
 > [!NOTE]
 > Logging functionality is **optional**. It is automatically enabled when the `Microsoft.Extensions.Logging` assembly is detected in your project.
-> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.logging`.
+> The package can be optionnaly installed from OpenUPM `org.nuget.microsoft.extensions.logging` or Nuget `Microsoft.Extensions.Logging`
 
 When the logging package is present, the framework automatically defines the `MSDI_LOGGING` symbol, enabling extension methods for configuring loggers on the host builder.
 
@@ -228,7 +228,7 @@ Configuration support integrates `Microsoft.Extensions.Configuration` into the U
 
 > [!NOTE]
 > Configuration functionality is optional. It requires the `Microsoft.Extensions.Configuration` assembly to be present in the project.
-> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.configuration`.
+> The package can be optionnaly installed from OpenUPM `org.nuget.microsoft.extensions.configuration` or Nuget `Microsoft.Extensions.Configuration`
 
 When the configuration package is present, the framework automatically defines the `MSDI_CONFIGURATION` symbol, enabling extension methods for adding configuration on the host builder.
 
