@@ -6,6 +6,18 @@ This package allow Unity host project to work seamlessly with `Microsoft.Extensi
 
 ### From package manager using git
 
+- Add OpenUPM scoped registry in your manifest.json to retrieve dependent `Microsoft.Extensions.*` packages nuget equivalent
+```
+"scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget"
+      ]
+    }
+],
+```
 - Add the following line in your manifest.json
 ```
 "com.parazite.msdi4unity": "https://github.com/parazite13/MSDI4Unity.git?path=/com.parazite.msdi4unity"
@@ -114,18 +126,7 @@ Logging support integrates directly with standard `Microsoft.Extensions.Logging`
 
 > [!NOTE]
 > Logging functionality is **optional**. It is automatically enabled when the `Microsoft.Extensions.Logging` assembly is detected in your project.
-> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.logging` and the scoped registry: 
-```
-"scopedRegistries": [
-    {
-      "name": "package.openupm.com",
-      "url": "https://package.openupm.com",
-      "scopes": [
-        "org.nuget"
-      ]
-    }
-],
-```
+> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.logging`.
 
 When the logging package is present, the framework automatically defines the `MSDI_LOGGING` symbol, enabling extension methods for configuring loggers on the host builder.
 
@@ -196,18 +197,7 @@ Configuration support integrates `Microsoft.Extensions.Configuration` into the U
 
 > [!NOTE]
 > Configuration functionality is optional. It requires the `Microsoft.Extensions.Configuration` assembly to be present in the project.
-> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.configuration` and the scoped registry: 
-```
-"scopedRegistries": [
-    {
-      "name": "package.openupm.com",
-      "url": "https://package.openupm.com",
-      "scopes": [
-        "org.nuget"
-      ]
-    }
-],
-```
+> The package can be optionnaly installed from OpenUPM with the package: `org.nuget.microsoft.extensions.configuration`.
 
 When the configuration package is present, the framework automatically defines the `MSDI_CONFIGURATION` symbol, enabling extension methods for adding configuration on the host builder.
 
@@ -283,12 +273,6 @@ namespace MSDI4Unity.Sample.Behaviours
     }
 }
 ```
-
-## IDisposable services
-
-Like it is done in MSDI, services that implements `IDisposable`, the services will have their `Dispose()` method called when the scoped is closed.
-It means that it'll be calld either on scene unload for scene scoped services or when the project is stopped for the project scoped services.
-See `DisposableTestService.cs` for more infos.
 
 ## Lifetime
 
